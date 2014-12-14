@@ -1,0 +1,16 @@
+{
+  "name": "GBoilarplate",
+  "version": "1.0.0",
+  "description": "A gulp setup for web development",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mihai Ionut Vilcu",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-data": "^1.0.2",
+    "gulp-template": "^1.1.1",
+    "lodash": "^2.4.1"
+  }
+}

@@ -1,0 +1,38 @@
+//
+// Fonts
+// -----
+// Custom fonts defined as mixins
+
+
+//
+// Font face
+// -----
+// Define here the font face for custom fonts
+//
+
+
+
+//
+// Mixins
+// -----
+// Define here mixins for the used fonts
+//
+
+@mixin Arial() {
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+@mixin Georgia() {
+    font-family: Georgia,Times,"Times New Roman",serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+@mixin CourierNew() {
+    font-family: "Courier New",Courier,"Lucida Sans Typewriter","Lucida Typewriter",monospace;
+    font-weight: normal;
+    font-style: normal;
+}
+
