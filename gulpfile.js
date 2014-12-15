@@ -11,6 +11,7 @@ var gutil = require('gulp-util');
 var template = require('gulp-template');
 var data = require('gulp-data');
 var usemin = require('gulp-usemin');
+var del = require('del');
 
 // css packages
 var sass = require('gulp-ruby-sass');
@@ -34,11 +35,13 @@ var tplPaths = [__dirname + '/src/partials'];
 gulp.task('html', function() {
   return gulp
           .src(['src/*.html', '!src/_*.html'])
+          // attach the path of the file
           .pipe(data(function (file) {
             return {
               file: file.path
             };
           }))
+          // compile the template
           .pipe(template({
             pkg: require('./package.json'),
             include: include
@@ -91,7 +94,53 @@ gulp.task('usemin', ['html'], function () {
           .pipe(connect.reload());
 });
 
-gulp.task('dev', ['sass', 'usemin', 'serve'], function () {
+
+// copy the files that we don't compile
+gulp.task('copy', ['clean:files'], function () {
+  return gulp.src(['src/**/*.*', '!src/**/*.html', '!src/**/*.js', '!src/**/*.{sass,scss}'])
+    .pipe(gulp.dest('dist/'));
+});
+
+
+// clean tasks
+gulp.task('clean:files', function (cb) {
+
+  del([
+    'dist/**/*.*',
+    '!dist/**/*.html',
+    '!dist/**/*.js',
+    '!dist/**/*.{css,map}'
+  ], cb);
+
+});
+
+gulp.task('clean:js', function (cb) {
+
+  del([
+    'dist/**/*.js'
+  ], cb);
+
+});
+
+gulp.task('clean:html', function (cb) {
+
+  del([
+    'dist/**/*.html'
+  ], cb);
+
+});
+
+gulp.task('clean:css', function (cb) {
+
+  del([
+    'dist/**/*.css',
+    'dist/**/*.css.map'
+  ], cb);
+
+});
+
+
+gulp.task('dev', ['sass', 'copy', 'usemin', 'serve'], function () {
 
   gulp.watch('src/assets/scss/**/*.{sass,scss}', ['sass']);
   gulp.watch('src/**/*.{html,js}', ['usemin']);
@@ -99,6 +148,7 @@ gulp.task('dev', ['sass', 'usemin', 'serve'], function () {
   open('http://localhost:'+ port +'/dist');
 
 });
+
 
 /**
  * Lo-Dash Template helpers
