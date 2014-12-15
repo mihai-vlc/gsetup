@@ -11,6 +11,8 @@ var gutil = require('gulp-util');
 var template = require('gulp-template');
 var data = require('gulp-data');
 var usemin = require('gulp-usemin');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 var del = require('del');
 
 // css packages
@@ -19,6 +21,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var sourcemaps = require('gulp-sourcemaps');
 var connect = require('gulp-connect');
 var gulpFilter = require('gulp-filter');
+var minifyCSS = require('gulp-minify-css')
 
 var open = require('open');
 var fs = require('fs');
@@ -72,6 +75,14 @@ gulp.task('sass', function () {
             .pipe(connect.reload());
 });
 
+gulp.task('sass:build', ['sass'], function () {
+  return gulp.src('dist/assets/css/*.css')
+    .pipe(minifyCSS())
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('dist/assets/css'));
+});
 
 // start a development server
 gulp.task('serve', function () {
@@ -82,10 +93,12 @@ gulp.task('serve', function () {
   return true;
 });
 
-// minify the javascript
+// concatenate & minify the javascript
 gulp.task('usemin', ['html'], function () {
   return gulp.src('dist/**/*.html')
-          .pipe(usemin())
+          .pipe(usemin({
+            js: [uglify(), rename({ suffix: '.min' })]
+          }))
             .on('error', function(e){
                 log(e.message);
                 this.emit('end');
@@ -139,15 +152,27 @@ gulp.task('clean:css', function (cb) {
 
 });
 
+gulp.task('clean', function (cb) {
+  del(['dist'], cb);
+});
 
-gulp.task('dev', ['sass', 'copy', 'usemin', 'serve'], function () {
+
+gulp.task('dev', ['sass', 'copy', 'html', 'serve'], function () {
 
   gulp.watch('src/assets/scss/**/*.{sass,scss}', ['sass']);
-  gulp.watch('src/**/*.{html,js}', ['usemin']);
+
+  gulp.watch('src/**/*.html', ['html']);
+
+  gulp.watch('src/**/*.js', function () {
+    gulp.src('src/**/*.js').pipe(connect.reload());
+  });
 
   open('http://localhost:'+ port +'/dist');
 
 });
+
+gulp.task('build', ['sass:build', 'copy', 'usemin']);
+
 
 
 /**
