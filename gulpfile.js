@@ -3,36 +3,102 @@
  * @author Mihai Ionut Vilcu <ionutvmi@gmail.com>
  * Dec 2014
  */
-/* globals require, console, __dirname*/
+/* globals require, __dirname*/
 'use strict';
 
 var gulp = require('gulp');
+var gutil = require('gulp-util');
 var template = require('gulp-template');
 var data = require('gulp-data');
+var usemin = require('gulp-usemin');
 
+// css packages
+var sass = require('gulp-ruby-sass');
+var autoprefixer = require('gulp-autoprefixer');
+var sourcemaps = require('gulp-sourcemaps');
+var connect = require('gulp-connect');
+var gulpFilter = require('gulp-filter');
+
+var open = require('open');
 var fs = require('fs');
 var path = require('path');
 var _ = require('lodash');
+
+var port = 8001; // webserver port
 
 // folders to seach for partials template files
 var tplPaths = [__dirname + '/src/partials'];
 
 
-gulp.task('default', function() {
-  gulp
-    .src(['src/*.html', '!src/_*.html'])
-    .pipe(data(function (file) {
-      return {
-        file: file.path
-      };
-    }))
-    .pipe(template({
-      name: 'Mihai',
-      include: include
-    }))
-    .pipe(gulp.dest('dist/'));
+// build the html
+gulp.task('html', function() {
+  return gulp
+          .src(['src/*.html', '!src/_*.html'])
+          .pipe(data(function (file) {
+            return {
+              file: file.path
+            };
+          }))
+          .pipe(template({
+            pkg: require('./package.json'),
+            include: include
+          }))
+          .on('error', function(e){
+              log(e.message);
+              this.emit('end');
+          })
+          .pipe(gulp.dest('dist/'));
 });
 
+// compile sass
+gulp.task('sass', function () {
+    var cssFilter = gulpFilter('**/*.css');
+    return gulp.src(['src/assets/scss/**/*.{scss,sass}'])
+            .pipe(sass({style : 'expanded'}))
+                .on('error', function(e){
+                    log(e.message);
+                    this.emit('end');
+                })
+            .pipe(sourcemaps.init({loadMaps: true}))
+            .pipe(autoprefixer({
+                browsers: ['> 1%', 'last 3 versions', 'Firefox ESR', 'Opera 12.1', 'IE 8']
+            }))
+            .pipe(sourcemaps.write())
+            .pipe(gulp.dest('dist/assets/css'))
+            .pipe(cssFilter)
+            .pipe(connect.reload());
+});
+
+
+// start a development server
+gulp.task('serve', function () {
+  connect.server({
+    port: port,
+    livereload: true
+  });
+  return true;
+});
+
+// minify the javascript
+gulp.task('usemin', ['html'], function () {
+  return gulp.src('dist/**/*.html')
+          .pipe(usemin())
+            .on('error', function(e){
+                log(e.message);
+                this.emit('end');
+            })
+          .pipe(gulp.dest('dist'))
+          .pipe(connect.reload());
+});
+
+gulp.task('dev', ['sass', 'usemin', 'serve'], function () {
+
+  gulp.watch('src/assets/scss/**/*.{sass,scss}', ['sass']);
+  gulp.watch('src/**/*.{html,js}', ['usemin']);
+
+  open('http://localhost:'+ port +'/dist');
+
+});
 
 /**
  * Lo-Dash Template helpers
@@ -44,7 +110,7 @@ function include(tplName) {
   var t = this;
 
   if (typeof tplName != 'string') {
-    console.log('\x07>> The tplName must be a string: ' + tplName);
+    log('>> The tplName must be a string: ' + tplName);
     return '';
   }
 
@@ -56,18 +122,18 @@ function include(tplName) {
   filePath = getFilePath(tplName);
 
   if ( ! filePath) {
-    console.log('\x07>> The import file does not exists: ' + tplName);
+    log('>> The import file does not exists: ' + tplName);
     return '';
   }
 
   if (filePath == t.file) {
-    console.log('\x07>> You can not import a file into itself !');
+    log('>> You can not import a file into itself !');
     return '';
   }
-  if ( t._recursion && !validReference(t, t.file) ) {
-    console.log('\x07>> Recursion detected !', t.file);
-    return '';
-  }
+  // if ( t._recursion && !validReference(t, t.file) ) {
+  //   log('>> Recursion detected !', t.file);
+  //   return '';
+  // }
 
   try {
     var data = Object.create(t);
@@ -76,12 +142,17 @@ function include(tplName) {
 
     content = _.template(fs.readFileSync(filePath), data);
   } catch(e) {
-    console.log('\x07>> ' + e.message);
+    log('>> ' + e.message);
   }
 
   return content;
 }
 
+/**
+ * Builds and returns the path based on the template name
+ * @param  {string} tplName The name/path to the template
+ * @return {string|boolean}         The path or false if the path doesn't exists
+ */
 function getFilePath(tplName) {
   var filePath, basePath, name, dir;
 
@@ -114,21 +185,7 @@ function getFilePath(tplName) {
 }
 
 
-/**
- * Check for circular references
- * @param  {object} t    The object containing all the paths
- * @param  {string} file The file being checked
- * @return {boolean} True if there are no circular refferences
- */
-function validReference(t, file) {
 
-  if ( ! t.prototype) {
-    return true;
-  }
-  if( file == t.prototype.file ) {
-    return false;
-  }
-
-  return validReferece(t.prototype, file)
+function log(msg) {
+  gutil.log('\x07 [Error] ' + msg);
 }
-
