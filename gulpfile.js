@@ -36,6 +36,7 @@ var tplPaths = [__dirname + '/src/partials'];
 
 // build the html
 gulp.task('html', function() {
+
   return gulp
           .src(['src/*.html', '!src/_*.html'])
           // attach the path of the file
@@ -46,6 +47,7 @@ gulp.task('html', function() {
           }))
           // compile the template
           .pipe(template({
+            isBuild: (this.seq.indexOf('usemin') > -1),
             pkg: require('./package.json'),
             include: include
           }))
@@ -76,7 +78,7 @@ gulp.task('sass', function () {
 });
 
 gulp.task('sass:build', ['sass'], function () {
-  return gulp.src('dist/assets/css/*.css')
+  return gulp.src(['dist/assets/css/*.css', '!dist/assets/css/*.min.css'])
     .pipe(minifyCSS())
     .pipe(rename({
       suffix: '.min'
@@ -94,17 +96,22 @@ gulp.task('serve', function () {
 });
 
 // concatenate & minify the javascript
-gulp.task('usemin', ['html'], function () {
+gulp.task('usemin', ['html', 'sass:build'], function () {
+
+  var uglify_log = uglify().on('error', function(e){
+    log(e.message);
+    this.emit('end');
+  });
+
   return gulp.src('dist/**/*.html')
           .pipe(usemin({
-            js: [uglify(), rename({ suffix: '.min' })]
+            js: [uglify_log]
           }))
-            .on('error', function(e){
-                log(e.message);
-                this.emit('end');
-            })
-          .pipe(gulp.dest('dist'))
-          .pipe(connect.reload());
+          .on('error', function(e){
+              log(e.message);
+              this.emit('end');
+          })
+          .pipe(gulp.dest('dist'));
 });
 
 
@@ -171,7 +178,7 @@ gulp.task('dev', ['sass', 'copy', 'html', 'serve'], function () {
 
 });
 
-gulp.task('build', ['sass:build', 'copy', 'usemin']);
+gulp.task('build', ['copy', 'usemin']);
 
 
 
