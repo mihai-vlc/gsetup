@@ -7,13 +7,14 @@
 <h2>Dependencies list</h2>
 <ol>
 
-    <%
+<%
     _.each(pkg.devDependencies, function(val, key) {
-        print('<li>');
+        print('    <li>');
         print(key + ' - ' + val);
-        print('</li>');
+        print('</li>\n');
     });
-    %>
+
+%>
 
 </ol>
 

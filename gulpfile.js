@@ -36,6 +36,7 @@ var tplPaths = [__dirname + '/src/partials'];
 
 // build the html
 gulp.task('html', function() {
+  var isBuild = (this.seq.indexOf('usemin') > -1);
 
   return gulp
           .src(['src/*.html', '!src/_*.html'])
@@ -47,15 +48,19 @@ gulp.task('html', function() {
           }))
           // compile the template
           .pipe(template({
-            isBuild: (this.seq.indexOf('usemin') > -1),
+            isBuild: function () {
+              return isBuild;
+            },
             pkg: require('./package.json'),
-            include: include
+            include: include,
+            path: path
           }))
           .on('error', function(e){
               log(e.message);
               this.emit('end');
           })
-          .pipe(gulp.dest('dist/'));
+          .pipe(gulp.dest('dist/'))
+          .pipe(connect.reload());
 });
 
 // compile sass

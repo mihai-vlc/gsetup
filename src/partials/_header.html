@@ -11,7 +11,7 @@
     <!-- endbuild -->
 
     <%
-    var style = isBuild ? 'styles.min.css' : 'styles.css';
+    var style = isBuild() ? 'styles.min.css' : 'styles.css';
     %>
     <link rel="stylesheet" href="assets/css/<%= style %>">
 </head>
