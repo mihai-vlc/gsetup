@@ -1,10 +1,7 @@
 //
 // Generic
 // -----
-// Ground zero styles (Normalize.css, resets, box-sizing
+// Ground zero styles (Normalize.css, resets, box-sizing)
 //
 
-h1 {
-    text-align: center;
-    text-transform: uppercase;
-}
+@import "libs/normalize/normalize";
