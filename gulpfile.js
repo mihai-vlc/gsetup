@@ -186,6 +186,8 @@ gulp.task('dev', ['sass', 'copy', 'html', 'serve'], function () {
 gulp.task('build', ['copy', 'usemin']);
 
 
+gulp.task('default', ['dev']);
+
 
 /**
  * Lo-Dash Template helpers
