@@ -56,7 +56,7 @@ gulp.task('html', function() {
             path: path
           }))
           .on('error', function(e){
-              log(e.message);
+              log('TPL>>' + e.message);
               this.emit('end');
           })
           .pipe(gulp.dest('dist/'))
@@ -69,7 +69,7 @@ gulp.task('sass', function () {
     return gulp.src(['src/assets/scss/**/*.{scss,sass}'])
             .pipe(sass({style : 'expanded'}))
                 .on('error', function(e){
-                    log(e.message);
+                    log('SASS>>' + e.message);
                     this.emit('end');
                 })
             .pipe(sourcemaps.init({loadMaps: true}))
@@ -104,7 +104,7 @@ gulp.task('serve', function () {
 gulp.task('usemin', ['html', 'sass:build'], function () {
 
   var uglify_log = uglify().on('error', function(e){
-    log(e.message);
+    log('UGLIFY>>' + e.message);
     this.emit('end');
   });
 
@@ -113,7 +113,7 @@ gulp.task('usemin', ['html', 'sass:build'], function () {
             js: [uglify_log]
           }))
           .on('error', function(e){
-              log(e.message);
+              log('UGLIFY>>' + e.message);
               this.emit('end');
           })
           .pipe(gulp.dest('dist'));
@@ -195,11 +195,12 @@ gulp.task('default', ['dev']);
 
 function include(tplName) {
   /* jshint validthis: true*/
-  var content = '', filePath;
-  var t = this;
+  var content = '',
+      filePath,
+      t = this;
 
   if (typeof tplName != 'string') {
-    log('>> The tplName must be a string: ' + tplName);
+    log('TPL>> The tplName must be a string: ' + tplName);
     return '';
   }
 
@@ -211,31 +212,56 @@ function include(tplName) {
   filePath = getFilePath(tplName);
 
   if ( ! filePath) {
-    log('>> The import file does not exists: ' + tplName);
+    log('TPL>> The import file does not exists: ' + tplName);
     return '';
   }
 
   if (filePath == t.file) {
-    log('>> You can not import a file into itself !');
+    log('TPL>> You can not import a file into itself !');
     return '';
   }
-  // if ( t._recursion && !validReference(t, t.file) ) {
-  //   log('>> Recursion detected !', t.file);
-  //   return '';
-  // }
+
+  if ( ! validReference(t, t.file) ) {
+    log('>> Recursion detected in `' +  t.file + '`');
+    return '';
+  }
 
   try {
     var data = Object.create(t);
     data.file = filePath;
-    data._recursion = true;
-
+    data.$parent = t;
     content = _.template(fs.readFileSync(filePath), data);
   } catch(e) {
-    log('>> ' + e.message);
+    log('TPL>> ' + e.message);
   }
 
   return content;
 }
+
+/**
+ * Checks for circular references in the partials includes
+ * @param  {object} t The object being checked
+ * @return {boolean}   True if there is no circular reference
+ */
+function validReference(t, file) {
+
+  if ( ! t.$parent ) {
+    return true;
+  }
+  var tmp = t;
+
+  // check if the current file was included in the past
+  while ( tmp = tmp.$parent ) {
+
+    if ( file === tmp.file ) {
+      return false;
+    }
+
+  }
+
+  return true;
+}
+
 
 /**
  * Builds and returns the path based on the template name
@@ -275,6 +301,9 @@ function getFilePath(tplName) {
 
 
 
-function log(msg) {
-  gutil.log('\x07 [Error] ' + msg);
+function log() {
+  var args = Array.prototype.slice.call(arguments, 0);
+
+  args.unshift('\x07[Error]');
+  gutil.log.apply(gutil.log, args);
 }
