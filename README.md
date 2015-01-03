@@ -33,47 +33,73 @@
 
 ### Templates
 Apart from the default functionality provided by the [LoDash Templates](https://lodash.com/docs#template)
-this setup also includes a few helper vars as described below.
+this setup also includes a few helper functions as described below.
 
-**include(tplName)**
-```html
-<%= include('header') %>
-<div class="main">
+
+
+
+<table>
+    
+<thead>
+    <tr>
+        <th>Helper</th>
+        <th>Description</th>
+    </tr>
+</thead>
+
+<tbody>
+    <tr>
+        <td>include(tplName)</td>
+        <td>
+            
+            <div class="highlight highlight-html"><pre>&lt;%= include('header') %&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s1"><span class="pl-pds">"</span>main<span class="pl-pds">"</span></span>&gt;
     Content
-</div>
-<%= include('footer') %>
-```
+&lt;/<span class="pl-ent">div</span>&gt;
+&lt;%= include('footer') %&gt;</pre></div>
+<p>The <code>include</code> function will grab and parse the content of the specified file using
+the same lodash template engine. </p>
+<p>Considering that in the src/index.html file we would have an <code>include('foo')</code> the search 
+would go like this:<br>
+First in the defined paths:</p>
+<ul class="task-list">
+<li>src/partials/_foo.html </li>
+<li>src/partials/foo </li>
+</ul>
+<p>Then in the current directory:</p>
+<ul class="task-list">
+<li>src/_foo.html </li>
+<li>src/foo </li>
+</ul>
+<p>When it finds the first path that exists it will stop searching.<br>
+You can add additional search paths in the <code>tplPaths</code> variable inside the gulpfile.<br>
+The current directory for the parsed file is added automatically at the end of the list.</p>
 
-The `include` function will grab and parse the content of the specified file using
-the same lodash template engine. 
+        </td>
+    </tr>
 
-Considering that in the src/index.html file we would have an `include('foo')` the search 
-would go like this:  
-First in the defined paths:
+    <tr>
+        <td>isBuild()</td>
+        <td>You can use this function inside the templates to determine if the current process is
+a build one</td>
+    </tr>
 
-- src/partials/_foo.html 
-- src/partials/foo 
+    <tr>
+        
+        <td>file</td>
 
-Then in the current directory:
+        <td>This variable will contain the path of the current template/partial file.</td>
+    </tr>
 
-- src/_foo.html 
-- src/foo 
+    <tr>
+        <td>path</td>
+        <td>The nodejs path module http://nodejs.org/api/path.html</td>
+    </tr>
 
-When it finds the first path that exists it will stop searching.  
-You can add additional search paths in the `tplPaths` variable inside the gulpfile.  
-The current directory for the parsed file is added automatically at the end of the list.
+</tbody>
 
+</table>
 
-**isBuild()**  
-You can use this function inside the templates to determine if the current process is
-a build one
-
-
-**file**
-This variable will contain the path of the current template/partial file.
-
-**path**
-The nodejs [path module](http://nodejs.org/api/path.html)
 
 ### Contributions
 
