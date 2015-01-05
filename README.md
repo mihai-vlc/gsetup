@@ -81,7 +81,7 @@ The current directory for the parsed file is added automatically at the end of t
     <tr>
         <td>isBuild()</td>
         <td>You can use this function inside the templates to determine if the current process is
-a build one</td>
+a build one.</td>
     </tr>
 
     <tr>
@@ -108,7 +108,7 @@ Please report bugs in the [issue tracker](https://github.com/ionutvmi/gsetup/iss
 
 ### Author
 
-**Mihai Ionut Vilcu**
+Mihai Ionut Vilcu
  
 + [github/ionutvmi](https://github.com/ionutvmi)
 + [twitter/ionutvmi](http://twitter.com/ionutvmi) 
